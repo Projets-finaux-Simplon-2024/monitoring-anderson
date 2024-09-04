@@ -1,0 +1,54 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_container
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring_network
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_container
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring_network
+    restart: always
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter_container
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring_network
+    restart: always
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter_container
+    environment:
+      DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/anderson?sslmode=disable"
+    ports:
+      - "9187:9187"
+    networks:
+      - monitoring_network
+    restart: always
+
+volumes:
+  grafana-storage:
+
+networks:
+  monitoring_network:
+    external: true

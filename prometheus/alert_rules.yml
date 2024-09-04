@@ -1,0 +1,66 @@
+groups:
+  - name: api-alerts
+    rules:
+    # Alerte sur la latence API
+    - alert: APIHighLatency
+      expr: http_request_duration_seconds_sum / http_request_duration_seconds_count > 0.2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "API Latency High"
+        description: "The API latency is over 200ms for more than 5 minutes."
+
+    # Alerte sur le taux d'erreurs API
+    - alert: APIHighErrorRate
+      expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High Error Rate in API"
+        description: "The error rate (5xx) for the API has exceeded 1% over 5 minutes."
+
+  - name: minio-alerts
+    rules:
+    # Alerte sur l'utilisation du stockage MinIO
+    - alert: MinIOStorageFull
+      expr: (minio_node_drive_used_bytes / minio_node_drive_total_bytes) > 0.8
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "MinIO Storage is reaching 80% capacity"
+        description: "MinIO storage is over 80% utilized."
+
+    # Alerte sur la latence des requêtes MinIO
+    - alert: MinIOLatencyHigh
+      expr: minio_node_drive_latency_us > 100000
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "MinIO Latency High"
+        description: "The latency for MinIO requests exceeds 100ms."
+
+  - name: postgres-alerts
+    rules:
+    # Alerte sur la latence des requêtes PostgreSQL
+    - alert: PostgresHighLatency
+      expr: pg_stat_statements_total_time / pg_stat_statements_calls > 0.3
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Postgres Query Latency High"
+        description: "The query latency for Postgres has exceeded 300ms over 5 minutes."
+
+    # Alerte sur le taux de connexion PostgreSQL
+    - alert: PostgresConnectionsLow
+      expr: pg_stat_database_numbackends < 0.95 * pg_settings_max_connections
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Postgres Connections Below 95%"
+        description: "The available connections to Postgres are below 95% of the limit."
