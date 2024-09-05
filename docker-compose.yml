@@ -1,10 +1,11 @@
 services:
   # Prometheus pour la collecte des métriques
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus
     container_name: prometheus_container
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
     ports:
       - "9090:9090"
     networks:
@@ -47,6 +48,18 @@ services:
       DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/anderson?sslmode=disable"
     ports:
       - "9187:9187"
+    networks:
+      - monitoring_network
+    restart: always
+
+  # Alertmanager pour la gestion des alertes
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager_container
+    volumes:
+      - ./alertmanager/config.yml:/etc/alertmanager/config.yml
+    ports:
+      - "9093:9093"
     networks:
       - monitoring_network
     restart: always

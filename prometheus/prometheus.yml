@@ -1,11 +1,16 @@
 global:
-  scrape_interval: 15s  # Intervalle par défaut pour scraper les métriques
-  evaluation_interval: 15s  # Intervalle pour évaluer les règles d'alertes
+  scrape_interval: 10s  # Intervalle par défaut pour scraper les métriques
+  evaluation_interval: 10s  # Intervalle pour évaluer les règles d'alertes
 
 # Alerting rules configuration
 rule_files:
-  - "alert_rules.yml"  # Fichier contenant les règles d'alertes
+  - /etc/prometheus/alert_rules.yml  # Fichier contenant les règles d'alertes
 
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets: ['alertmanager:9093']
+          
 scrape_configs:
   # Prometheus self-monitoring
   - job_name: 'prometheus'
@@ -33,3 +38,4 @@ scrape_configs:
     static_configs:
       - targets: ['fastapi:8080']
 
+ # Le nom du service Alertmanager dans Docker

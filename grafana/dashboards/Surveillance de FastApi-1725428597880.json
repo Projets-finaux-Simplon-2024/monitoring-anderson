@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
   "links": [],
   "panels": [
     {
@@ -70,7 +69,7 @@
           "calcs": [
             "mean"
           ],
-          "fields": "",
+          "fields": "/^sum\\(rate\\(http_requests_total\\{status=~\"2\\.\\.\"\\}\\[5m\\]\\)\\) / sum\\(rate\\(http_requests_total\\[5m\\]\\)\\) \\* 100$/",
           "values": false
         },
         "showThresholdLabels": true,
@@ -101,9 +100,9 @@
     },
     {
       "datasource": {
-        "default": false,
+        "default": true,
         "type": "prometheus",
-        "uid": "prometheus-anderson-API"
+        "uid": "P5E668660250B6235"
       },
       "fieldConfig": {
         "defaults": {
@@ -116,15 +115,16 @@
             "mode": "percentage",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "red",
                 "value": 1
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -143,7 +143,7 @@
         "percentChangeColorMode": "inverted",
         "reduceOptions": {
           "calcs": [
-            "mean"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
@@ -164,11 +164,24 @@
             "uid": "prometheus-anderson-API"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_requests_total{status=~\"4..\"}[5m])) + sum(rate(http_requests_total{status=~\"5..\"}[5m]))",
+          "expr": "sum(rate(http_requests_total{status=~\"4..\"}[5m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P5E668660250B6235"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Taux d'erreurs 4xx et 5xx",
@@ -176,9 +189,9 @@
     },
     {
       "datasource": {
-        "default": false,
+        "default": true,
         "type": "prometheus",
-        "uid": "prometheus-anderson-API"
+        "uid": "P5E668660250B6235"
       },
       "fieldConfig": {
         "defaults": {
@@ -193,6 +206,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "axisSoftMax": 200,
+            "axisSoftMin": 0,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
@@ -235,7 +249,20 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Temps de réponse (ms)"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 12,
@@ -263,7 +290,7 @@
             "uid": "prometheus-anderson-API"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -280,13 +307,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Surveillance de FastApi",
-  "uid": "edwupi70ehhc0f",
-  "version": 7,
+  "uid": "prometheus-anderson-API",
+  "version": 5,
   "weekStart": ""
 }
